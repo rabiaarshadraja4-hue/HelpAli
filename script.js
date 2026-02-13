@@ -1,4 +1,4 @@
-// Floating emojis
+// ---------------- Floating emojis ----------------
 const emojis = ['💛','🌸','✨','🌿','💫'];
 function floatingEmojis(){
     const elem = document.createElement('div');
@@ -12,7 +12,7 @@ function floatingEmojis(){
 }
 setInterval(floatingEmojis, 1000);
 
-// Typing effect
+// ---------------- Typing effect ----------------
 function typeMessage(element, text, callback){
     let index=0;
     element.style.opacity=1;
@@ -29,47 +29,58 @@ function typeMessage(element, text, callback){
     typeChar();
 }
 
-// ---------------- Session Flow ---------------- //
-// 50-step session
-const sessionFlow = [
-    {msg:"Therapist: Assalam-o-Alaikum Ali 💛, aaj hum therapy session start karte hain. Kaisa mehsoos kar rahe ho?", 
-     choices:['Bohat sad aur bechain','Thora behtar','Normal','Anxiety aur regret']},
-    {msg:"Therapist: Theek hai, regret normal hai. Ab ek breathing exercise karte hain. Kaunsa choose karenge?", 
-     choices:['4-4-4 breathing','Normal saans','Peaceful memory','Direct baat']},
-    {msg:"Therapist: Bohat achay. Heartbeat kaisa feel hota hai?", 
-     choices:['Tez','Thori slow','Normal','Bad-tar']},
-    {msg:"Therapist: Quran Surah Al-Inshirah 5-6: 'Fa inna ma'al usri yusra'. Is ayat se kya seekha?", 
-     choices:['Mushkil guzar jayegi','Kuch nahi','Allah par bharosa','Dono A aur C']},
-    {msg:"Therapist: Hadith: Prophet (PBUH) ne farmaya musibat mein sabr karne wale ko ajar milta hai. Kaunsi advice better lagegi?", 
-     choices:['Apne achay kaamon ko yaad karen','Regret ignore karen','Dua karen','Sab C options']},
-    {msg:"Therapist: Emotional side: Kaunsa positive thought choose karenge future ke liye?", 
-     choices:['Advice yaad kar ke motivate hoon','Sirf sad feel karoon','Future goals set karoon','Koi thought nahi']},
-    {msg:"Therapist: Abbu ke liye dua aur nek kaam continue karein. Overall ab feel kaisa hai?", 
-     choices:['Bohat relax','Thora behtar','Same','Need one more session']},
-    // Steps 8-50: Add similar motivational, spiritual, emotional MCQs
+// ---------------- MCQ batches ----------------
+const allBatches = [
+    [ // Batch 1
+        {msg:"Assalam-o-Alaikum Ali 💛, aaj kaisa mehsoos kar rahe ho?", 
+         choices:['Bohat sad aur bechain','Thora behtar','Normal','Anxiety aur regret']},
+        {msg:"Regret aur anxiety normal hai. Ab breathing exercise karen. Kaunsa try karenge?", 
+         choices:['4-4-4 breathing','Normal saans','Peaceful memory imagine','Direct baat']},
+        {msg:"Heart rate ab kaisa lag raha hai?", 
+         choices:['Tez','Thori slow','Normal','Bad-tar']}
+    ],
+    [ // Batch 2
+        {msg:"Quran Surah Al-Inshirah 5-6: 'Fa inna ma\\'al usri yusra'. Is ayat se kya seekha?", 
+         choices:['Mushkil guzar jayegi','Kuch nahi','Allah par bharosa','Dono A aur C']},
+        {msg:"Hadith: Musibat mein sabr karne wale ko ajar milta hai. Kaunsa step choose karenge?", 
+         choices:['Achay kaamon ko yaad karen','Regret ignore','Dua karen','Sab C options']},
+        {msg:"Ab emotional side: Future ke liye kaunsa positive thought choose karenge?", 
+         choices:['Advice yaad kar ke motivate','Sirf sad feel karna','Future goals set karna','Koi thought nahi']}
+    ],
+    [ // Batch 3
+        {msg:"Abbu ke liye dua aur nek kaam continue karen. Overall ab feel kaisa hai?", 
+         choices:['Bohat relax','Thora behtar','Same','Need next part']},
+        {msg:"Imagine karo abbu heaven mein hain, aapki khidmat se khush. Feeling?", 
+         choices:['Peace aur motivation','Sadness','Regret','Neutral']},
+        {msg:"Roz dua aur nek kaam continue karne se kya feel hota hai?", 
+         choices:['Calm','Motivated','Peaceful','Sab upar wale']}
+    ],
+    [ // Batch 4-16 placeholder for 50+ questions
+        {msg:"Step 4: Calmly think positive. Kaunsa option choose karenge?", choices:['Option A','Option B','Option C','Option D']},
+        {msg:"Step 5: Deep breathing ya visualization. Kaunsa?", choices:['Option A','Option B','Option C','Option D']},
+        {msg:"Step 6: Quran yaad karke motivate. Option?", choices:['Option A','Option B','Option C','Option D']}
+    ]
 ];
 
-// For demo, I'll replicate sessionFlow 8-50 with slight variations
-for(let i=7;i<50;i++){
-    sessionFlow.push({
-        msg:`Therapist: Step ${i+1} - Keep calm and think positive. Kaunsa option choose karenge?`,
-        choices:['Option A','Option B','Option C','Option D']
-    });
+// Duplicate last batch to make total 50+ questions
+while(allBatches.flat().length < 50){
+    allBatches.push(allBatches[3]);
 }
 
-// ---------------- Session Logic ---------------- //
-let currentStep=0;
+// ---------------- Session Logic ----------------
+let currentBatch = 0;
+let currentStep = 0;
 
-function showStep(step){
+function showStep(){
+    const batch = allBatches[currentBatch];
     const conversation = document.getElementById('conversation');
     const msgElem = document.createElement('div');
     msgElem.className='message';
     conversation.appendChild(msgElem);
-    typeMessage(msgElem, sessionFlow[step].msg, ()=>{
-        // Show choices
+    typeMessage(msgElem, batch[currentStep].msg, ()=>{
         const choicesDiv = document.getElementById('choices');
         choicesDiv.innerHTML='';
-        sessionFlow[step].choices.forEach(choice=>{
+        batch[currentStep].choices.forEach(choice=>{
             const btn = document.createElement('button');
             btn.textContent=choice;
             btn.onclick=()=>{ nextStep(); };
@@ -79,19 +90,38 @@ function showStep(step){
 }
 
 function nextStep(){
+    const batch = allBatches[currentBatch];
     currentStep++;
-    if(currentStep<sessionFlow.length){
-        showStep(currentStep);
+    if(currentStep<batch.length){
+        showStep();
     } else {
+        // Batch complete, show Next Page
         document.getElementById('choices').style.display='none';
+        document.getElementById('nextPage').style.display='block';
+    }
+}
+
+// Next Page
+function nextBatch(){
+    currentBatch++;
+    if(currentBatch<allBatches.length){
+        document.getElementById('conversation').innerHTML='';
+        document.getElementById('choices').style.display='block';
+        document.getElementById('nextPage').style.display='none';
+        currentStep=0;
+        showStep();
+    } else {
+        // End of all batches
+        document.getElementById('conversation').innerHTML='';
+        document.getElementById('nextPage').style.display='none';
         document.getElementById('endSession').style.display='block';
     }
 }
 
-// Start session
-showStep(currentStep);
-
-// End session
+// End Session
 function endSessionConfirm(){
-    alert('Alhamdulillah! Session complete. Roz dua aur nek kaam continue karein. 💛');
+    alert('Alhamdulillah! Roz dua aur nek kaam continue karein. 💛');
 }
+
+// Start first batch
+showStep();
